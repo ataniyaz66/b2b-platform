@@ -1,7 +1,8 @@
-const { Client, Deal, Invoice, Task, User } = require('../models/index');
+const { Client, Deal, Invoice, Task, User, Notification } = require('../models/index');
 const { Op } = require('sequelize');
+const bcrypt = require('bcrypt');
+const { sendMail } = require('../config/mailer');
 
-// Список клиентов
 const getClients = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -25,7 +26,7 @@ const getClients = async (req, res) => {
       order: [['createdAt', 'DESC']],
     });
 
-    const unreadCount = await require('../models/Notification').count({
+    const unreadCount = await Notification.count({
       where: { user_id: userId, is_read: false },
     });
 
@@ -45,7 +46,6 @@ const getClients = async (req, res) => {
   }
 };
 
-// Карточка клиента
 const getClient = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -60,9 +60,11 @@ const getClient = async (req, res) => {
 
     if (!client) return res.status(404).render('error', { message: 'Клиент не найден', status: 404 });
 
-    const unreadCount = await require('../models/Notification').count({
+    const unreadCount = await Notification.count({
       where: { user_id: userId, is_read: false },
     });
+
+    const hasAccess = await User.findOne({ where: { email: client.email, role: 'client' } });
 
     res.render('clients/show', {
       title: client.name,
@@ -70,6 +72,9 @@ const getClient = async (req, res) => {
       user: req.user,
       unreadCount,
       client,
+      hasAccess: !!hasAccess,
+      successMsg: req.query.success === 'access_created' ? req.query.password : null,
+      errorMsg: req.query.error || null,
     });
   } catch (err) {
     console.error(err);
@@ -77,19 +82,16 @@ const getClient = async (req, res) => {
   }
 };
 
-// Форма создания
 const getNewClient = (req, res) => {
-  const unreadCount = 0;
   res.render('clients/new', {
     title: 'Новый клиент',
     path: '/clients',
     user: req.user,
-    unreadCount,
+    unreadCount: 0,
     error: null,
   });
 };
 
-// Создать клиента
 const postClient = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -109,12 +111,7 @@ const postClient = async (req, res) => {
 
     await Client.create({
       owner_id: userId,
-      name,
-      contact_person,
-      email,
-      phone,
-      address,
-      country,
+      name, contact_person, email, phone, address, country,
       currency: currency || 'USD',
       status: status || 'active',
       tags: tagsArray,
@@ -134,7 +131,6 @@ const postClient = async (req, res) => {
   }
 };
 
-// Форма редактирования
 const getEditClient = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -155,7 +151,6 @@ const getEditClient = async (req, res) => {
   }
 };
 
-// Обновить клиента
 const putClient = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -173,7 +168,6 @@ const putClient = async (req, res) => {
   }
 };
 
-// Удалить клиента
 const deleteClient = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -185,4 +179,48 @@ const deleteClient = async (req, res) => {
   }
 };
 
-module.exports = { getClients, getClient, getNewClient, postClient, getEditClient, putClient, deleteClient };
+const createClientAccess = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const client = await Client.findOne({ where: { id: req.params.id, owner_id: userId } });
+    if (!client) return res.status(404).render('error', { message: 'Клиент не найден', status: 404 });
+
+    if (!client.email) {
+      return res.redirect(`/clients/${client.id}?error=no_email`);
+    }
+
+    const existing = await User.findOne({ where: { email: client.email, role: 'client' } });
+    if (existing) {
+      return res.redirect(`/clients/${client.id}?error=already_exists`);
+    }
+
+    const tempPassword = Math.random().toString(36).slice(-8);
+    const password_hash = await bcrypt.hash(tempPassword, 10);
+
+    await User.create({
+      company_name: client.name,
+      email: client.email,
+      password_hash,
+      role: 'client',
+    });
+
+    await sendMail({
+      to: client.email,
+      subject: 'Доступ в личный кабинет',
+      html: `<p>Здравствуйте, ${client.name}!</p>
+             <p>Ваш логин: <strong>${client.email}</strong></p>
+             <p>Пароль: <strong>${tempPassword}</strong></p>
+             <p><a href="http://localhost:3000/auth/client/login">Войти в личный кабинет</a></p>`,
+    }).catch(err => console.error('Email error:', err));
+
+    res.redirect(`/clients/${client.id}?success=access_created&password=${tempPassword}`);
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('error', { message: 'Ошибка создания доступа', status: 500 });
+  }
+};
+
+module.exports = {
+  getClients, getClient, getNewClient, postClient,
+  getEditClient, putClient, deleteClient, createClientAccess,
+};

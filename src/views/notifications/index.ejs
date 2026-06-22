@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head><%- include('../partials/head') %></head>
+<body>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/navbar') %>
+    <div class="page-content">
+
+      <h5 class="fw-bold mb-4">Уведомления</h5>
+
+      <% if (notifications.length === 0) { %>
+        <div class="stat-card text-center py-5">
+          <i class="bi bi-bell display-4 text-muted"></i>
+          <p class="text-muted mt-2">Уведомлений пока нет</p>
+        </div>
+      <% } else { %>
+        <% const typeIcon = { task: 'check2-square', invoice: 'receipt', document: 'file-earmark-text', deal: 'kanban' } %>
+        <% const typeColor = { task: 'primary', invoice: 'warning', document: 'info', deal: 'success' } %>
+        <% notifications.forEach(n => { %>
+          <div class="stat-card mb-2 d-flex align-items-center gap-3">
+            <div class="stat-icon bg-<%= typeColor[n.type] %> bg-opacity-10 text-<%= typeColor[n.type] %>">
+              <i class="bi bi-<%= typeIcon[n.type] %>"></i>
+            </div>
+            <div class="flex-grow-1">
+              <div class="<%= n.is_read ? 'text-muted' : 'fw-semibold' %>"><%= n.message %></div>
+              <div class="text-muted small">
+                <%= new Date(n.createdAt).toLocaleDateString('ru-RU') %>
+                <%= new Date(n.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) %>
+              </div>
+            </div>
+            <% if (!n.is_read) { %>
+              <span class="badge bg-danger">Новое</span>
+            <% } %>
+          </div>
+        <% }) %>
+      <% } %>
+
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

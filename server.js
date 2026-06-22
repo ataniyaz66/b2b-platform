@@ -1,6 +1,7 @@
 require('dotenv').config();
 const app = require('./app');
 const { sequelize } = require('./src/config/db');
+const { startCronJobs } = require('./src/services/cronService');
 
 require('./src/models/index');
 
@@ -13,6 +14,8 @@ async function start() {
 
     await sequelize.sync({ alter: true });
     console.log('✅ Модели синхронизированы');
+
+    startCronJobs();
 
     app.listen(PORT, () => {
       console.log(`🚀 Сервер запущен на http://localhost:${PORT}`);

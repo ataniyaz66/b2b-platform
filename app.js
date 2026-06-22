@@ -12,6 +12,8 @@ const invoiceRoutes = require('./src/routes/invoiceRoutes');
 const taskRoutes = require('./src/routes/taskRoutes');
 const reportRoutes = require('./src/routes/reportRoutes');
 const documentRoutes = require('./src/routes/documentRoutes');
+const portalRoutes = require('./src/routes/portalRoutes');
+const notificationRoutes = require('./src/routes/notificationRoutes');
 
 const app = express();
 
@@ -32,6 +34,8 @@ app.use('/invoices', invoiceRoutes);
 app.use('/tasks', taskRoutes);
 app.use('/reports', reportRoutes);
 app.use('/documents', documentRoutes);
+app.use('/portal', portalRoutes);
+app.use('/notifications', notificationRoutes);
 
 app.get('/', (req, res) => res.redirect('/auth/login'));
 
