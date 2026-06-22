@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head><%- include('../partials/head') %></head>
+<body>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/navbar') %>
+    <div class="page-content">
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0">Счета</h5>
+        <a href="/invoices/new" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Новый счёт</a>
+      </div>
+
+      <!-- Фильтр -->
+      <form method="GET" action="/invoices" class="row g-2 mb-4">
+        <div class="col-md-3">
+          <select name="status" class="form-select">
+            <option value="">Все статусы</option>
+            <option value="issued" <%= status === 'issued' ? 'selected' : '' %>>Выставлен</option>
+            <option value="pending" <%= status === 'pending' ? 'selected' : '' %>>Ожидает</option>
+            <option value="paid" <%= status === 'paid' ? 'selected' : '' %>>Оплачен</option>
+            <option value="overdue" <%= status === 'overdue' ? 'selected' : '' %>>Просрочен</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-outline-primary w-100">Фильтр</button>
+        </div>
+        <div class="col-md-2">
+          <a href="/invoices" class="btn btn-outline-secondary w-100">Сброс</a>
+        </div>
+      </form>
+
+      <div class="stat-card">
+        <% if (invoices.length === 0) { %>
+          <div class="text-center py-5">
+            <i class="bi bi-receipt display-4 text-muted"></i>
+            <p class="text-muted mt-2">Счетов пока нет</p>
+            <a href="/invoices/new" class="btn btn-primary">Создать первый счёт</a>
+          </div>
+        <% } else { %>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>#</th>
+                  <th>Клиент</th>
+                  <th>Сумма</th>
+                  <th>Срок оплаты</th>
+                  <th>Статус</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% invoices.forEach(inv => { %>
+                  <tr>
+                    <td><a href="/invoices/<%= inv.id %>" class="text-decoration-none fw-semibold">#<%= inv.id.slice(0,8) %></a></td>
+                    <td><%= inv.client ? inv.client.name : '—' %></td>
+                    <td><strong><%= inv.amount %> <%= inv.currency %></strong></td>
+                    <td>
+                      <% if (inv.due_date) { %>
+                        <span class="<%= new Date(inv.due_date) < new Date() && inv.status !== 'paid' ? 'text-danger' : '' %>">
+                          <%= new Date(inv.due_date).toLocaleDateString('ru-RU') %>
+                        </span>
+                      <% } else { %>—<% } %>
+                    </td>
+                    <td>
+                      <% const invBadge = { issued: 'primary', pending: 'warning', paid: 'success', overdue: 'danger' } %>
+                      <% const invMap = { issued: 'Выставлен', pending: 'Ожидает', paid: 'Оплачен', overdue: 'Просрочен' } %>
+                      <span class="badge bg-<%= invBadge[inv.status] %>"><%= invMap[inv.status] %></span>
+                    </td>
+                    <td>
+                      <a href="/invoices/<%= inv.id %>" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-eye"></i>
+                      </a>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

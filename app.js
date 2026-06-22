@@ -8,6 +8,7 @@ const authRoutes = require('./src/routes/authRoutes');
 const dashboardRoutes = require('./src/routes/dashboardRoutes');
 const clientRoutes = require('./src/routes/clientRoutes');
 const dealRoutes = require('./src/routes/dealRoutes');
+const invoiceRoutes = require('./src/routes/invoiceRoutes');
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use('/auth', authRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/clients', clientRoutes);
 app.use('/deals', dealRoutes);
+app.use('/invoices', invoiceRoutes);
 
 app.get('/', (req, res) => res.redirect('/auth/login'));
 

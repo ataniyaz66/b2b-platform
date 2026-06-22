@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head><%- include('../partials/head') %></head>
+<body>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/navbar') %>
+    <div class="page-content">
+
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center">
+          <a href="/invoices" class="btn btn-outline-secondary me-3"><i class="bi bi-arrow-left"></i></a>
+          <h5 class="fw-bold mb-0">Счёт #<%= invoice.id.slice(0,8) %></h5>
+        </div>
+        <div class="d-flex gap-2">
+          <% const invBadge = { issued: 'primary', pending: 'warning', paid: 'success', overdue: 'danger' } %>
+          <% const invMap = { issued: 'Выставлен', pending: 'Ожидает подтверждения', paid: 'Оплачен', overdue: 'Просрочен' } %>
+          <span class="badge bg-<%= invBadge[invoice.status] %> fs-6 align-self-center"><%= invMap[invoice.status] %></span>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-5">
+          <div class="stat-card">
+            <h6 class="fw-semibold mb-3">Детали счёта</h6>
+            <div class="mb-2"><span class="text-muted small">Клиент:</span><br/>
+              <a href="/clients/<%= invoice.client.id %>"><%= invoice.client.name %></a>
+            </div>
+            <div class="mb-2"><span class="text-muted small">Сумма:</span><br/>
+              <strong class="fs-4"><%= invoice.amount %> <%= invoice.currency %></strong>
+            </div>
+            <div class="mb-2"><span class="text-muted small">Срок оплаты:</span><br/>
+              <%= invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('ru-RU') : '—' %>
+            </div>
+            <% if (invoice.deal) { %>
+              <div class="mb-2"><span class="text-muted small">Сделка:</span><br/>
+                <a href="/deals/<%= invoice.deal.id %>"><%= invoice.deal.title %></a>
+              </div>
+            <% } %>
+            <% if (invoice.description) { %>
+              <div class="mb-2"><span class="text-muted small">Описание:</span><br/><%= invoice.description %></div>
+            <% } %>
+            <% if (invoice.confirmed_at) { %>
+              <div class="mb-2"><span class="text-muted small">Подтверждено клиентом:</span><br/>
+                <%= new Date(invoice.confirmed_at).toLocaleDateString('ru-RU') %>
+              </div>
+            <% } %>
+            <% if (invoice.confirmation_file) { %>
+              <div class="mb-2">
+                <span class="text-muted small">Файл подтверждения:</span><br/>
+                <a href="/uploads/<%= invoice.confirmation_file %>" target="_blank" class="btn btn-sm btn-outline-success mt-1">
+                  <i class="bi bi-file-earmark me-1"></i>Скачать
+                </a>
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="col-md-7">
+          <div class="stat-card">
+            <h6 class="fw-semibold mb-3">Управление статусом</h6>
+            <% if (invoice.status === 'pending') { %>
+              <div class="alert alert-warning">
+                <i class="bi bi-clock me-2"></i>Клиент подтвердил оплату. Проверьте и обновите статус.
+              </div>
+            <% } %>
+            <div class="d-flex gap-2 flex-wrap">
+              <% if (invoice.status !== 'paid') { %>
+                <button onclick="updateStatus('paid')" class="btn btn-success">
+                  <i class="bi bi-check-circle me-1"></i>Отметить оплаченным
+                </button>
+              <% } %>
+              <% if (invoice.status !== 'overdue') { %>
+                <button onclick="updateStatus('overdue')" class="btn btn-outline-danger">
+                  <i class="bi bi-x-circle me-1"></i>Просрочен
+                </button>
+              <% } %>
+              <% if (invoice.status !== 'issued') { %>
+                <button onclick="updateStatus('issued')" class="btn btn-outline-primary">
+                  Вернуть статус "Выставлен"
+                </button>
+              <% } %>
+            </div>
+
+            <hr/>
+            <form action="/invoices/<%= invoice.id %>/delete" method="POST" onsubmit="return confirm('Удалить счёт?')">
+              <button type="submit" class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-trash me-1"></i>Удалить счёт
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+async function updateStatus(status) {
+  const res = await fetch(`/invoices/<%= invoice.id %>/status`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  });
+  if (res.ok) window.location.reload();
+}
+</script>
+</body>
+</html>
