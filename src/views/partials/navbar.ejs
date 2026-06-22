@@ -1,0 +1,14 @@
+<nav class="top-navbar d-flex align-items-center justify-content-between px-4">
+  <span class="fw-semibold text-muted"><%= typeof title !== 'undefined' ? title : '' %></span>
+  <div class="d-flex align-items-center gap-3">
+    <a href="/notifications" class="position-relative text-dark">
+      <i class="bi bi-bell fs-5"></i>
+      <% if (typeof unreadCount !== 'undefined' && unreadCount > 0) { %>
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+          <%= unreadCount %>
+        </span>
+      <% } %>
+    </a>
+    <span class="text-muted small"><%= typeof user !== 'undefined' ? user.company_name : '' %></span>
+  </div>
+</nav>

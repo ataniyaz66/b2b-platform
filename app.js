@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const path = require('path');
 
 const errorHandler = require('./src/middleware/errorHandler');
+const authRoutes = require('./src/routes/authRoutes');
 
 const app = express();
 
@@ -18,12 +19,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'src/public')));
 
-// Роуты 
+// Роуты
+app.use('/auth', authRoutes);
+
 app.get('/', (req, res) => {
   res.redirect('/auth/login');
 });
 
-// Error handler 
+// Error handler (всегда последний)
 app.use(errorHandler);
 
 module.exports = app;

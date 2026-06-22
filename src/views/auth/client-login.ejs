@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body class="auth-page">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <i class="bi bi-grid-fill"></i>
+        <span>B2B CRM</span>
+      </div>
+      <h4 class="text-center mb-4">Личный кабинет клиента</h4>
+
+      <% if (error) { %>
+        <div class="alert alert-danger"><%= error %></div>
+      <% } %>
+
+      <form action="/auth/client/login" method="POST">
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" required autofocus />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Пароль</label>
+          <input type="password" name="password" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Войти</button>
+      </form>
+
+      <hr />
+      <div class="text-center">
+        <a href="/auth/login" class="text-muted small">← Вход для бизнеса</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
