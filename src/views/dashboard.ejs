@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <%- include('./partials/head') %>
+</head>
+<body>
+<div class="app-layout">
+  <%- include('./partials/sidebar') %>
+  <div class="main-content">
+    <%- include('./partials/navbar') %>
+    <div class="page-content">
+
+      <!-- Статистика -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-3">
+          <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="text-muted small">Клиенты</div>
+                <div class="fs-3 fw-bold"><%= stats.clientsCount %></div>
+              </div>
+              <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                <i class="bi bi-people"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="text-muted small">Сделки</div>
+                <div class="fs-3 fw-bold"><%= stats.dealsCount %></div>
+              </div>
+              <div class="stat-icon bg-success bg-opacity-10 text-success">
+                <i class="bi bi-kanban"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="text-muted small">Активные сделки</div>
+                <div class="fs-3 fw-bold"><%= stats.activeDeals %></div>
+              </div>
+              <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                <i class="bi bi-lightning"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="text-muted small">Счета</div>
+                <div class="fs-3 fw-bold"><%= stats.invoicesCount %></div>
+              </div>
+              <div class="stat-icon bg-info bg-opacity-10 text-info">
+                <i class="bi bi-receipt"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <!-- Последние сделки -->
+        <div class="col-md-7">
+          <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="mb-0 fw-semibold">Последние сделки</h6>
+              <a href="/deals" class="btn btn-sm btn-outline-primary">Все сделки</a>
+            </div>
+            <% if (recentDeals.length === 0) { %>
+              <p class="text-muted text-center py-3">Сделок пока нет</p>
+            <% } else { %>
+              <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Название</th>
+                      <th>Клиент</th>
+                      <th>Сумма</th>
+                      <th>Стадия</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% recentDeals.forEach(deal => { %>
+                      <tr>
+                        <td><a href="/deals/<%= deal.id %>"><%= deal.title %></a></td>
+                        <td><%= deal.client ? deal.client.name : '—' %></td>
+                        <td><%= deal.amount %> <%= deal.currency %></td>
+                        <td>
+                          <% const stageMap = { new: 'Новая', negotiation: 'Переговоры', proposal: 'Предложение', won: 'Выиграна', lost: 'Проиграна' } %>
+                          <% const stageBadge = { new: 'secondary', negotiation: 'primary', proposal: 'info', won: 'success', lost: 'danger' } %>
+                          <span class="badge bg-<%= stageBadge[deal.stage] %>"><%= stageMap[deal.stage] %></span>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Просроченные задачи -->
+        <div class="col-md-5">
+          <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="mb-0 fw-semibold">Просроченные задачи</h6>
+              <a href="/tasks" class="btn btn-sm btn-outline-danger">Все задачи</a>
+            </div>
+            <% if (overdueTasks.length === 0) { %>
+              <p class="text-muted text-center py-3">Просроченных задач нет 🎉</p>
+            <% } else { %>
+              <% overdueTasks.forEach(task => { %>
+                <div class="d-flex align-items-center justify-content-between p-2 mb-2 rounded bg-danger bg-opacity-10">
+                  <div>
+                    <div class="fw-semibold small"><%= task.title %></div>
+                    <div class="text-danger small">
+                      <i class="bi bi-clock me-1"></i>
+                      <%= new Date(task.deadline).toLocaleDateString('ru-RU') %>
+                    </div>
+                  </div>
+                  <span class="badge bg-<%= task.priority === 'high' ? 'danger' : task.priority === 'medium' ? 'warning' : 'secondary' %>">
+                    <%= task.priority === 'high' ? 'Высокий' : task.priority === 'medium' ? 'Средний' : 'Низкий' %>
+                  </span>
+                </div>
+              <% }) %>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
