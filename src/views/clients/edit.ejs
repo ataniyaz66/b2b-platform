@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head><%- include('../partials/head') %></head>
+<body>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/navbar') %>
+    <div class="page-content">
+
+      <div class="d-flex align-items-center mb-4">
+        <a href="/clients/<%= client.id %>" class="btn btn-outline-secondary me-3"><i class="bi bi-arrow-left"></i></a>
+        <h5 class="fw-bold mb-0">Редактировать: <%= client.name %></h5>
+      </div>
+
+      <div class="stat-card" style="max-width:700px">
+        <% if (error) { %>
+          <div class="alert alert-danger"><%= error %></div>
+        <% } %>
+
+        <form action="/clients/<%= client.id %>/update" method="POST">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Название компании *</label>
+              <input type="text" name="name" class="form-control" value="<%= client.name %>" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Контактное лицо</label>
+              <input type="text" name="contact_person" class="form-control" value="<%= client.contact_person || '' %>" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control" value="<%= client.email || '' %>" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Телефон</label>
+              <input type="text" name="phone" class="form-control" value="<%= client.phone || '' %>" />
+            </div>
+            <div class="col-md-8">
+              <label class="form-label">Адрес</label>
+              <input type="text" name="address" class="form-control" value="<%= client.address || '' %>" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Страна</label>
+              <input type="text" name="country" class="form-control" value="<%= client.country || '' %>" />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Валюта</label>
+              <select name="currency" class="form-select">
+                <option value="USD" <%= client.currency === 'USD' ? 'selected' : '' %>>USD</option>
+                <option value="EUR" <%= client.currency === 'EUR' ? 'selected' : '' %>>EUR</option>
+                <option value="RUB" <%= client.currency === 'RUB' ? 'selected' : '' %>>RUB</option>
+                <option value="KZT" <%= client.currency === 'KZT' ? 'selected' : '' %>>KZT</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Статус</label>
+              <select name="status" class="form-select">
+                <option value="active" <%= client.status === 'active' ? 'selected' : '' %>>Активный</option>
+                <option value="lead" <%= client.status === 'lead' ? 'selected' : '' %>>Лид</option>
+                <option value="inactive" <%= client.status === 'inactive' ? 'selected' : '' %>>Неактивный</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Теги</label>
+              <input type="text" name="tags" class="form-control" value="<%= (client.tags || []).join(', ') %>" />
+              <div class="form-text">Через запятую</div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Заметки</label>
+              <textarea name="notes" class="form-control" rows="3"><%= client.notes || '' %></textarea>
+            </div>
+            <div class="col-12 d-flex justify-content-between">
+              <div>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+                <a href="/clients/<%= client.id %>" class="btn btn-outline-secondary ms-2">Отмена</a>
+              </div>
+              <form action="/clients/<%= client.id %>/delete" method="POST" onsubmit="return confirm('Удалить клиента?')">
+                <button type="submit" class="btn btn-outline-danger">
+                  <i class="bi bi-trash"></i> Удалить
+                </button>
+              </form>
+            </div>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

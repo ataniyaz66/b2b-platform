@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head><%- include('../partials/head') %></head>
+<body>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/navbar') %>
+    <div class="page-content">
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0">Клиенты</h5>
+        <a href="/clients/new" class="btn btn-primary">
+          <i class="bi bi-plus-lg me-1"></i>Новый клиент
+        </a>
+      </div>
+
+      <!-- Фильтры -->
+      <form method="GET" action="/clients" class="row g-2 mb-4">
+        <div class="col-md-5">
+          <input type="text" name="search" class="form-control" placeholder="Поиск по имени, email..." value="<%= search %>"/>
+        </div>
+        <div class="col-md-3">
+          <select name="status" class="form-select">
+            <option value="">Все статусы</option>
+            <option value="active" <%= status === 'active' ? 'selected' : '' %>>Активный</option>
+            <option value="inactive" <%= status === 'inactive' ? 'selected' : '' %>>Неактивный</option>
+            <option value="lead" <%= status === 'lead' ? 'selected' : '' %>>Лид</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-outline-primary w-100">Найти</button>
+        </div>
+        <div class="col-md-2">
+          <a href="/clients" class="btn btn-outline-secondary w-100">Сброс</a>
+        </div>
+      </form>
+
+      <!-- Таблица -->
+      <div class="stat-card">
+        <% if (clients.length === 0) { %>
+          <div class="text-center py-5">
+            <i class="bi bi-people display-4 text-muted"></i>
+            <p class="text-muted mt-2">Клиентов пока нет</p>
+            <a href="/clients/new" class="btn btn-primary">Добавить первого клиента</a>
+          </div>
+        <% } else { %>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Название</th>
+                  <th>Контакт</th>
+                  <th>Email</th>
+                  <th>Телефон</th>
+                  <th>Статус</th>
+                  <th>Теги</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% clients.forEach(client => { %>
+                  <tr>
+                    <td><a href="/clients/<%= client.id %>" class="fw-semibold text-decoration-none"><%= client.name %></a></td>
+                    <td><%= client.contact_person || '—' %></td>
+                    <td><%= client.email || '—' %></td>
+                    <td><%= client.phone || '—' %></td>
+                    <td>
+                      <% const statusMap = { active: ['success', 'Активный'], inactive: ['secondary', 'Неактивный'], lead: ['warning', 'Лид'] } %>
+                      <span class="badge bg-<%= statusMap[client.status][0] %>"><%= statusMap[client.status][1] %></span>
+                    </td>
+                    <td>
+                      <% (client.tags || []).forEach(tag => { %>
+                        <span class="badge bg-light text-dark border me-1"><%= tag %></span>
+                      <% }) %>
+                    </td>
+                    <td>
+                      <a href="/clients/<%= client.id %>/edit" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-pencil"></i>
+                      </a>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
