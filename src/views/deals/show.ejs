@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head><%- include('../partials/head') %></head>
+<body>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/navbar') %>
+    <div class="page-content">
+
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center">
+          <a href="/deals" class="btn btn-outline-secondary me-3"><i class="bi bi-arrow-left"></i></a>
+          <h5 class="fw-bold mb-0"><%= deal.title %></h5>
+        </div>
+        <a href="/deals/<%= deal.id %>/edit" class="btn btn-outline-primary"><i class="bi bi-pencil me-1"></i>Редактировать</a>
+      </div>
+
+      <% if (isStale) { %>
+        <div class="alert alert-warning">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          Сделка не двигалась <strong><%= daysSinceUpdate %> дней</strong>. Пора предпринять действие!
+        </div>
+      <% } %>
+
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="stat-card">
+            <h6 class="fw-semibold mb-3">Информация</h6>
+            <div class="mb-2"><span class="text-muted small">Клиент:</span><br/>
+              <% if (deal.client) { %><a href="/clients/<%= deal.client.id %>"><%= deal.client.name %></a><% } else { %>—<% } %>
+            </div>
+            <div class="mb-2"><span class="text-muted small">Сумма:</span><br/><strong><%= deal.amount %> <%= deal.currency %></strong></div>
+            <div class="mb-2"><span class="text-muted small">Дедлайн:</span><br/>
+              <%= deal.deadline ? new Date(deal.deadline).toLocaleDateString('ru-RU') : '—' %>
+            </div>
+            <div class="mb-3">
+              <span class="text-muted small">Стадия:</span><br/>
+              <% const stageBadge = { new: 'secondary', negotiation: 'primary', proposal: 'info', won: 'success', lost: 'danger' } %>
+              <% const stageMap = { new: 'Новая', negotiation: 'Переговоры', proposal: 'Предложение', won: 'Выиграна', lost: 'Проиграна' } %>
+              <span class="badge bg-<%= stageBadge[deal.stage] %> fs-6"><%= stageMap[deal.stage] %></span>
+            </div>
+
+            <!-- Смена стадии -->
+            <div>
+              <span class="text-muted small">Сменить стадию:</span>
+              <div class="d-flex flex-wrap gap-1 mt-1">
+                <% ['new','negotiation','proposal','won','lost'].forEach(s => { %>
+                  <% if (s !== deal.stage) { %>
+                    <button onclick="changeStage('<%= deal.id %>', '<%= s %>')"
+                      class="btn btn-sm btn-outline-<%= stageBadge[s] %>">
+                      <%= stageMap[s] %>
+                    </button>
+                  <% } %>
+                <% }) %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-8">
+          <!-- Задачи -->
+          <div class="stat-card mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="fw-semibold mb-0">Задачи (<%= deal.tasks.length %>)</h6>
+              <a href="/tasks/new?deal_id=<%= deal.id %>" class="btn btn-sm btn-outline-primary">+ Задача</a>
+            </div>
+            <% if (deal.tasks.length === 0) { %>
+              <p class="text-muted">Задач нет</p>
+            <% } else { %>
+              <% deal.tasks.forEach(task => { %>
+                <div class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
+                  <span class="<%= task.status === 'done' ? 'text-decoration-line-through text-muted' : '' %>"><%= task.title %></span>
+                  <% const prBadge = { low: 'secondary', medium: 'warning', high: 'danger' } %>
+                  <span class="badge bg-<%= prBadge[task.priority] %>"><%= task.priority %></span>
+                </div>
+              <% }) %>
+            <% } %>
+          </div>
+
+          <!-- Счета -->
+          <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="fw-semibold mb-0">Счета (<%= deal.invoices.length %>)</h6>
+              <a href="/invoices/new?deal_id=<%= deal.id %>" class="btn btn-sm btn-outline-primary">+ Счёт</a>
+            </div>
+            <% if (deal.invoices.length === 0) { %>
+              <p class="text-muted">Счетов нет</p>
+            <% } else { %>
+              <% deal.invoices.forEach(inv => { %>
+                <div class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
+                  <a href="/invoices/<%= inv.id %>" class="text-decoration-none"><%= inv.amount %> <%= inv.currency %></a>
+                  <% const invBadge = { issued: 'primary', pending: 'warning', paid: 'success', overdue: 'danger' } %>
+                  <% const invMap = { issued: 'Выставлен', pending: 'Ожидает', paid: 'Оплачен', overdue: 'Просрочен' } %>
+                  <span class="badge bg-<%= invBadge[inv.status] %>"><%= invMap[inv.status] %></span>
+                </div>
+              <% }) %>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+async function changeStage(dealId, stage) {
+  const res = await fetch(`/deals/${dealId}/stage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ stage }),
+  });
+  if (res.ok) window.location.reload();
+}
+</script>
+</body>
+</html>

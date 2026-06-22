@@ -7,6 +7,7 @@ const errorHandler = require('./src/middleware/errorHandler');
 const authRoutes = require('./src/routes/authRoutes');
 const dashboardRoutes = require('./src/routes/dashboardRoutes');
 const clientRoutes = require('./src/routes/clientRoutes');
+const dealRoutes = require('./src/routes/dealRoutes');
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(express.static(path.join(__dirname, 'src/public')));
 app.use('/auth', authRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/clients', clientRoutes);
+app.use('/deals', dealRoutes);
 
 app.get('/', (req, res) => res.redirect('/auth/login'));
 
