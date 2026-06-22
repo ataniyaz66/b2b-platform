@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head><%- include('../partials/head') %></head>
+<body>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/navbar') %>
+    <div class="page-content">
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0">Документы</h5>
+        <a href="/documents/new" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Новый документ</a>
+      </div>
+
+      <div class="stat-card">
+        <% if (documents.length === 0) { %>
+          <div class="text-center py-5">
+            <i class="bi bi-file-earmark-text display-4 text-muted"></i>
+            <p class="text-muted mt-2">Документов пока нет</p>
+            <a href="/documents/new" class="btn btn-primary">Создать первый документ</a>
+          </div>
+        <% } else { %>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Название</th>
+                  <th>Тип</th>
+                  <th>Клиент</th>
+                  <th>Сделка</th>
+                  <th>Дата</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% const typeMap = { contract: 'Договор', act: 'Акт', proposal: 'Предложение', other: 'Другое' } %>
+                <% const typeBadge = { contract: 'primary', act: 'success', proposal: 'info', other: 'secondary' } %>
+                <% documents.forEach(doc => { %>
+                  <tr>
+                    <td><a href="/documents/<%= doc.id %>" class="fw-semibold text-decoration-none"><%= doc.title %></a></td>
+                    <td><span class="badge bg-<%= typeBadge[doc.type] %>"><%= typeMap[doc.type] %></span></td>
+                    <td><%= doc.client ? doc.client.name : '—' %></td>
+                    <td><%= doc.deal ? doc.deal.title : '—' %></td>
+                    <td><%= new Date(doc.createdAt).toLocaleDateString('ru-RU') %></td>
+                    <td>
+                      <a href="/documents/<%= doc.id %>/pdf" class="btn btn-sm btn-outline-danger" title="Скачать PDF">
+                        <i class="bi bi-file-pdf"></i>
+                      </a>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
