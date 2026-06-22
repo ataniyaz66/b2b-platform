@@ -12,7 +12,11 @@ async function start() {
     await sequelize.authenticate();
     console.log('✅ База данных подключена');
 
-    await sequelize.sync({ alter: true });
+    const syncOption = process.env.NODE_ENV === 'production'
+      ? { alter: false }
+      : { alter: true };
+
+    await sequelize.sync(syncOption);
     console.log('✅ Модели синхронизированы');
 
     startCronJobs();
