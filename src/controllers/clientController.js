@@ -2,6 +2,7 @@ const { Client, Deal, Invoice, Task, User, Notification } = require('../models/i
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 const { sendMail } = require('../config/mailer');
+const { sequelize } = require('../config/db');
 
 const getClients = async (req, res) => {
   try {
@@ -171,7 +172,17 @@ const putClient = async (req, res) => {
 const deleteClient = async (req, res) => {
   try {
     const userId = req.user.id;
-    await Client.destroy({ where: { id: req.params.id, owner_id: userId } });
+    const client = await Client.findOne({ where: { id: req.params.id, owner_id: userId } });
+    if (!client) return res.status(404).render('error', { message: 'Клиент не найден', status: 404 });
+
+    const id = client.id;
+
+    await sequelize.query(`DELETE FROM documents WHERE client_id = '${id}'`);
+    await sequelize.query(`DELETE FROM tasks WHERE client_id = '${id}'`);
+    await sequelize.query(`DELETE FROM invoices WHERE client_id = '${id}'`);
+    await sequelize.query(`DELETE FROM deals WHERE client_id = '${id}'`);
+
+    await client.destroy();
     res.redirect('/clients');
   } catch (err) {
     console.error(err);
@@ -210,7 +221,7 @@ const createClientAccess = async (req, res) => {
       html: `<p>Здравствуйте, ${client.name}!</p>
              <p>Ваш логин: <strong>${client.email}</strong></p>
              <p>Пароль: <strong>${tempPassword}</strong></p>
-             <p><a href="http://localhost:3000/auth/client/login">Войти в личный кабинет</a></p>`,
+             <p><a href="https://b2b-platform-production-9ffb.up.railway.app/auth/client/login">Войти в личный кабинет</a></p>`,
     }).catch(err => console.error('Email error:', err));
 
     res.redirect(`/clients/${client.id}?success=access_created&password=${tempPassword}`);
