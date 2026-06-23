@@ -53,9 +53,9 @@
         </div>
         <div class="d-flex align-items-center gap-2">
           <span class="badge bg-<%= typeBadge[doc.type] %>"><%= typeMap[doc.type] %></span>
-          <% if (doc.file_path) { %>
-            <a href="/uploads/<%= doc.file_path %>" target="_blank" class="btn btn-sm btn-outline-primary">
-              <i class="bi bi-download"></i>
+          <% if (doc.file_path || doc.content) { %>
+            <a href="/portal/documents/<%- doc.id %>/pdf" target="_blank" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-download"></i> PDF
             </a>
           <% } %>
         </div>

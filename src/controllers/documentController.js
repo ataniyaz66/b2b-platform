@@ -177,20 +177,26 @@ const generatePDF = async (req, res) => {
 
     doc.pipe(res);
 
+    // Путь к шрифту
+    const fontPath = path.join(__dirname, '../../src/public/fonts/arial.ttf');
+
+    doc.registerFont('Arial', fontPath);
+    doc.font('Arial');
+
     // Шапка
-    doc.fontSize(20).font('Helvetica-Bold').text(document.title, { align: 'center' });
+    doc.fontSize(20).text(document.title, { align: 'center' });
     doc.moveDown();
 
-    // Тип документа
+    // Тип
     const typeMap = { contract: 'Договор', act: 'Акт', proposal: 'Предложение', other: 'Документ' };
-    doc.fontSize(12).font('Helvetica').text(`Тип: ${typeMap[document.type] || document.type}`);
+    doc.fontSize(12).text(`Тип: ${typeMap[document.type] || document.type}`);
     doc.text(`Дата: ${new Date(document.createdAt).toLocaleDateString('ru-RU')}`);
     doc.moveDown();
 
     // Клиент
     if (document.client) {
-      doc.fontSize(12).font('Helvetica-Bold').text('Клиент:');
-      doc.font('Helvetica').text(document.client.name);
+      doc.fontSize(12).text('Клиент:', { underline: true });
+      doc.text(document.client.name);
       if (document.client.contact_person) doc.text(`Контакт: ${document.client.contact_person}`);
       if (document.client.email) doc.text(`Email: ${document.client.email}`);
       if (document.client.address) doc.text(`Адрес: ${document.client.address}`);
@@ -199,25 +205,23 @@ const generatePDF = async (req, res) => {
 
     // Сделка
     if (document.deal) {
-      doc.font('Helvetica-Bold').text('Сделка:');
-      doc.font('Helvetica').text(`${document.deal.title} — ${document.deal.amount} ${document.deal.currency}`);
+      doc.text('Сделка:', { underline: true });
+      doc.text(`${document.deal.title} — ${document.deal.amount} ${document.deal.currency}`);
       doc.moveDown();
     }
 
     // Содержимое
     if (document.content) {
-      doc.font('Helvetica-Bold').text('Содержание:');
+      doc.text('Содержание:', { underline: true });
       doc.moveDown(0.5);
-      doc.font('Helvetica').text(document.content, { lineGap: 4 });
+      doc.text(document.content, { lineGap: 4 });
       doc.moveDown();
     }
 
-    // Подпись
+    // Подписи
     doc.moveDown(2);
-    doc.font('Helvetica').fontSize(10).text('_______________________', { align: 'left', continued: true });
-    doc.text('_______________________', { align: 'right' });
-    doc.fontSize(9).fillColor('gray').text('Подпись / Дата', { align: 'left', continued: true });
-    doc.text('Подпись клиента / Дата', { align: 'right' });
+    doc.text('_______________________          _______________________');
+    doc.fontSize(9).fillColor('gray').text('Подпись / Дата                             Подпись клиента / Дата');
 
     doc.end();
   } catch (err) {
