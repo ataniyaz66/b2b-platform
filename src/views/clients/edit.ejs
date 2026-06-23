@@ -75,16 +75,18 @@
                 <button type="submit" class="btn btn-primary">Сохранить</button>
                 <a href="/clients/<%= client.id %>" class="btn btn-outline-secondary ms-2">Отмена</a>
               </div>
-              <form action="/clients/<%= client.id %>/delete" method="POST" onsubmit="return confirm('Удалить клиента?')">
-                <button type="submit" class="btn btn-outline-danger">
-                  <i class="bi bi-trash"></i> Удалить
-                </button>
-              </form>
+              <button type="button" class="btn btn-outline-danger"
+                onclick="if(confirm('Удалить клиента?')) document.getElementById('delete-form').submit()">
+                <i class="bi bi-trash"></i> Удалить
+              </button>
             </div>
           </div>
         </form>
-      </div>
 
+        <!-- Форма удаления вынесена OUTSIDE основной формы -->
+        <form id="delete-form" action="/clients/<%= client.id %>/delete" method="POST"></form>
+
+      </div>
     </div>
   </div>
 </div>
