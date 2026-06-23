@@ -264,5 +264,5 @@ const resetClientAccess = async (req, res) => {
 
 module.exports = {
   getClients, getClient, getNewClient, postClient,
-  getEditClient, putClient, deleteClient, createClientAccess,
+  getEditClient, putClient, deleteClient, createClientAccess, resetClientAccess,
 };
