@@ -19,6 +19,8 @@ const app = express();
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'src/views'));
+app.set('view cache', false);
+app.locals.rmWhitespace = false;
 
 app.use(morgan('dev'));
 app.use(express.json());
