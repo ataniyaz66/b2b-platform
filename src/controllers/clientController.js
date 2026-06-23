@@ -231,6 +231,37 @@ const createClientAccess = async (req, res) => {
   }
 };
 
+const resetClientAccess = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const client = await Client.findOne({ where: { id: req.params.id, owner_id: userId } });
+    if (!client) return res.status(404).render('error', { message: 'Клиент не найден', status: 404 });
+
+    const existing = await User.findOne({ where: { email: client.email, role: 'client' } });
+    if (!existing) {
+      return res.redirect(`/clients/${client.id}?error=no_access`);
+    }
+
+    const tempPassword = Math.random().toString(36).slice(-8);
+    const password_hash = await bcrypt.hash(tempPassword, 10);
+
+    await existing.update({ password_hash });
+
+    await sendMail({
+      to: client.email,
+      subject: 'Новый пароль для личного кабинета',
+      html: `<p>Здравствуйте, ${client.name}!</p>
+             <p>Ваш новый пароль: <strong>${tempPassword}</strong></p>
+             <p><a href="https://b2b-platform-production-9ffb.up.railway.app/auth/client/login">Войти в личный кабинет</a></p>`,
+    }).catch(err => console.error('Email error:', err));
+
+    res.redirect(`/clients/${client.id}?success=access_created&password=${tempPassword}`);
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('error', { message: 'Ошибка сброса пароля', status: 500 });
+  }
+};
+
 module.exports = {
   getClients, getClient, getNewClient, postClient,
   getEditClient, putClient, deleteClient, createClientAccess,

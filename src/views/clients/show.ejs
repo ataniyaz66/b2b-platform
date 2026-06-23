@@ -96,9 +96,12 @@
               </button>
             </form>
           <% } else { %>
-            <span class="btn btn-success disabled">
-              <i class="bi bi-person-check me-1"></i>Доступ выдан
-            </span>
+            <form action="/clients/<%- client.id %>/reset-access" method="POST">
+              <button type="submit" class="btn btn-success"
+                onclick="return confirm('Сгенерировать новый пароль для клиента?')">
+                <i class="bi bi-arrow-clockwise me-1"></i>Сбросить пароль
+              </button>
+            </form>
           <% } %>
         </div>
       </div>
